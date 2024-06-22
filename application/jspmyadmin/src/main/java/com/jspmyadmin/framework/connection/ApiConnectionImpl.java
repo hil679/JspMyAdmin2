@@ -1,214 +1,238 @@
+/**
+ * 
+ */
 package com.jspmyadmin.framework.connection;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.servlet.http.HttpSession;
+import javax.sound.midi.Soundbank;
 
 import com.jspmyadmin.framework.constants.Constants;
 import com.jspmyadmin.framework.web.utils.RequestAdaptor;
-import com.mysql.cj.jdbc.MysqlDataSource;
 
 /**
  * @author Yugandhar Gangu
  * @created_at 2016/02/02
+ *
  */
 class ApiConnectionImpl implements ApiConnection {
 
-    private static final String _URL = "jdbc:mysql://";
-    private static final String _YEARISDATETYPE = "?yearIsDateType=false";
+	private static final String _DRIVER = "com.mysql.jdbc.Driver";
+	private static final String _URL = "jdbc:mysql://";
+	private static final String _YEARISDATETYPE = "?yearIsDateType=false";
+	private static final String _SSLOPTION= "&useSSL=false";
 
-    private final Connection _connection;
 
-    /**
-     * @throws SQLException e
-     */
-    ApiConnectionImpl() throws SQLException {
-        try {
-            _connection = _openConnection(null);
-            if (_connection != null) {
-                _connection.setAutoCommit(false);
-            }
-        } catch (SQLException e) {
-            HttpSession session = RequestAdaptor.REQUEST_MAP.get(Thread.currentThread().getId()).getSession();
-            session.setAttribute(Constants.SESSION_CONNECT, true);
-            session.setAttribute(Constants.MYSQL_ERROR, e.getMessage());
-            throw e;
-        }
-    }
+	private final Connection _connection;
 
-    /**
-     * @param dbName String
-     * @throws SQLException e
-     */
-    ApiConnectionImpl(String dbName) throws SQLException {
-        try {
-            _connection = _openConnection(dbName);
-            if (_connection != null) {
-                _connection.setAutoCommit(false);
-            }
-        } catch (SQLException e) {
-            HttpSession session = RequestAdaptor.REQUEST_MAP.get(Thread.currentThread().getId()).getSession();
-            session.setAttribute(Constants.SESSION_CONNECT, true);
-            throw e;
-        }
-    }
+	/**
+	 * 
+	 * @throws SQLException
+	 */
+	public ApiConnectionImpl() throws SQLException {
+		try {
+			_connection = _openConnection(null);
+			_connection.setAutoCommit(false);
+		} catch (SQLException e) {
+			System.out.println(e);
+			System.out.println("[Emtpy DB Exception]");
+			HttpSession session = RequestAdaptor.REQUEST_MAP.get(Thread.currentThread().getId()).getSession();
+			session.setAttribute(Constants.SESSION_CONNECT, true);
+			System.out.println(e.getMessage());
+			System.out.println(e.getErrorCode());
+			System.out.println(e.getSQLState());
+			throw e;
+		}
+	}
 
-    /**
-     * @param host String
-     * @param port String
-     * @param user String
-     * @param pass String
-     * @throws SQLException e
-     */
-    ApiConnectionImpl(String host, String port, String user, String pass) throws SQLException {
-        try {
-            _connection = _openConnection(host, port, user, pass);
-        } catch (SQLException e) {
-            HttpSession session = RequestAdaptor.REQUEST_MAP.get(Thread.currentThread().getId()).getSession();
-            session.setAttribute(Constants.SESSION_CONNECT, true);
-            throw e;
-        }
-    }
+	/**
+	 * 
+	 * @param dbName
+	 * @throws SQLException
+	 */
+	public ApiConnectionImpl(String dbName) throws SQLException {
+		try {
+			_connection = _openConnection(dbName);
+			_connection.setAutoCommit(false);
+		} catch (SQLException e) {
+			System.out.println("[DBName] ApiConnectionImpl Exception");
+			HttpSession session = RequestAdaptor.REQUEST_MAP.get(Thread.currentThread().getId()).getSession();
+			session.setAttribute(Constants.SESSION_CONNECT, true);
+			throw e;
+		}
+	}
 
-    public void close() {
-        try {
-            if (_connection != null && !_connection.isClosed()) {
-                _connection.close();
-            }
-        } catch (SQLException ignored) {
-        }
-    }
+	/**
+	 * 
+	 * @param host
+	 * @param port
+	 * @param user
+	 * @param pass
+	 * @throws SQLException
+	 */
+	public ApiConnectionImpl(String host, String port, String user, String pass) throws SQLException {
+		try {
+			_connection = _openConnection(host, port, user, pass);
+		} catch (SQLException e) {
+			HttpSession session = RequestAdaptor.REQUEST_MAP.get(Thread.currentThread().getId()).getSession();
+			session.setAttribute(Constants.SESSION_CONNECT, true);
+			throw e;
+		}
+	}
 
-    public PreparedStatement getStmtSelect(final String query) throws SQLException {
-        return _connection.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
-                ResultSet.CONCUR_READ_ONLY);
-    }
+	public void close() {
+		try {
+			if (_connection != null && !_connection.isClosed()) {
+				_connection.close();
+			}
+		} catch (SQLException e) {
+		}
+	}
 
-    public PreparedStatement getStmt(final String query) throws SQLException {
-        return _connection.prepareStatement(query);
-    }
+	public PreparedStatement getStmtSelect(final String query) throws SQLException {
+		PreparedStatement statement = _connection.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
+				ResultSet.CONCUR_READ_ONLY);
+		return statement;
+	}
 
-    public DatabaseMetaData getDatabaseMetaData() throws SQLException {
-        return _connection.getMetaData();
-    }
+	public PreparedStatement getStmt(final String query) throws SQLException {
+		PreparedStatement statement = _connection.prepareStatement(query);
+		return statement;
+	}
 
-    public void commit() {
-        if (_connection != null) {
-            try {
-                _connection.commit();
-            } catch (SQLException ignored) {
-            }
-        }
-    }
+	public DatabaseMetaData getDatabaseMetaData() throws SQLException {
+		return _connection.getMetaData();
+	}
 
-    public void rollback() {
-        if (_connection != null) {
-            try {
-                _connection.rollback();
-            } catch (SQLException ignored) {
-            }
-        }
-    }
+	public void commit() {
+		if (_connection != null) {
+			try {
+				_connection.commit();
+			} catch (SQLException e) {
+			}
+		}
+	}
 
-    /**
-     * To open connection by providing all of the properties.
-     *
-     * @param host String
-     * @param port String
-     * @param user String
-     * @param pass String
-     * @return Connection
-     * @throws SQLException e
-     */
-    private Connection _openConnection(String host, String port, String user, String pass) throws SQLException {
+	public void rollback() {
+		if (_connection != null) {
+			try {
+				_connection.rollback();
+			} catch (SQLException e) {
+			}
+		}
+	}
 
-        MysqlDataSource dataSource = new MysqlDataSource();
-        dataSource.setUseSSL(false);
-        dataSource.setURL(_URL + host + Constants.SYMBOL_COLON + port + Constants.SYMBOL_BACK_SLASH);
-        dataSource.setUser(user);
-        dataSource.setPassword(pass);
-        return dataSource.getConnection();
-    }
+	/**
+	 * 
+	 * @param host
+	 * @param port
+	 * @param user
+	 * @param pass
+	 * @return
+	 * @throws SQLException
+	 */
+	private Connection _openConnection(String host, String port, String user, String pass) throws SQLException {
 
-    /**
-     * To open the connection with database name or without database name.
-     *
-     * @param dbName String
-     * @return Connection
-     * @throws SQLException e
-     */
-    private Connection _openConnection(String dbName) throws SQLException {
+		try {
+			Class.forName(_DRIVER);
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
+		Connection connection = null;
+		StringBuilder builder = new StringBuilder(_URL);
+		builder.append(host);
+		builder.append(Constants.SYMBOL_COLON);
+		builder.append(port);
+		builder.append(Constants.SYMBOL_BACK_SLASH);
+		connection = DriverManager.getConnection(builder.toString(), user, pass);
+		return connection;
+	}
 
-        StringBuilder builder = new StringBuilder(_URL);
-        switch (ConnectionFactory.connectionType) {
-            case LOGIN:
-                HttpSession httpSession = RequestAdaptor.REQUEST_MAP.get(Thread.currentThread().getId()).getSession();
-                if (httpSession.getAttribute(Constants.SESSION_HOST) != null) {
-                    builder.append(httpSession.getAttribute(Constants.SESSION_HOST).toString());
-                    builder.append(Constants.SYMBOL_COLON);
-                    builder.append(httpSession.getAttribute(Constants.SESSION_PORT).toString());
-                    builder.append(Constants.SYMBOL_BACK_SLASH);
-                }
-                if (dbName != null) {
-                    builder.append(dbName);
-                }
-                builder.append(_YEARISDATETYPE);
+	/**
+	 * 
+	 * @param dbName
+	 * @return
+	 * @throws SQLException
+	 */
+	private Connection _openConnection(String dbName) throws SQLException {
 
-                MysqlDataSource dataSource = new MysqlDataSource();
-                dataSource.setUseSSL(false);
-                dataSource.setURL(builder.toString());
-                dataSource.setUser(httpSession.getAttribute(Constants.SESSION_USER).toString());
-                String pass = httpSession.getAttribute(Constants.SESSION_PASS).toString();
-                if (!Constants.BLANK.equals(pass)) {
-                    dataSource.setPassword(pass);
-                }
-                return dataSource.getConnection();
+		try {
+			Class.forName(_DRIVER);
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
+		Connection connection = null;
+		StringBuilder builder = new StringBuilder(_URL);
+		System.out.println(ConnectionFactory.connectionType);
+		switch (ConnectionFactory.connectionType) {
+		case LOGIN:
+			HttpSession httpSession = RequestAdaptor.REQUEST_MAP.get(Thread.currentThread().getId()).getSession();
+			if (httpSession.getAttribute(Constants.SESSION_HOST) != null) {
+				builder.append(httpSession.getAttribute(Constants.SESSION_HOST).toString());
+				builder.append(Constants.SYMBOL_COLON);
+				builder.append(httpSession.getAttribute(Constants.SESSION_PORT).toString());
+				builder.append(Constants.SYMBOL_BACK_SLASH);
+			}
+			if (dbName != null) {
+				builder.append(dbName);
+			}
+			builder.append(_YEARISDATETYPE);
+			builder.append(_SSLOPTION);
+			String pass = httpSession.getAttribute(Constants.SESSION_PASS).toString();
+			if (Constants.BLANK.equals(pass)) {
+				pass = null;
+			}
+			connection = DriverManager.getConnection(builder.toString(),
+					httpSession.getAttribute(Constants.SESSION_USER).toString(), pass);
+			break;
 
-            case HALF_CONFIG:
-                if (ConnectionFactory.config.getHost() != null) {
-                    builder.append(ConnectionFactory.config.getHost());
-                    builder.append(Constants.SYMBOL_COLON);
-                    builder.append(ConnectionFactory.config.getPort());
-                    builder.append(Constants.SYMBOL_BACK_SLASH);
-                }
-                httpSession = RequestAdaptor.REQUEST_MAP.get(Thread.currentThread().getId()).getSession();
-                if (dbName != null) {
-                    builder.append(dbName);
-                }
-                builder.append(_YEARISDATETYPE);
-                dataSource = new MysqlDataSource();
-                dataSource.setUseSSL(false);
-                dataSource.setURL(builder.toString());
-                dataSource.setUser(httpSession.getAttribute(Constants.SESSION_USER).toString());
-                pass = httpSession.getAttribute(Constants.SESSION_PASS).toString();
-                if (!Constants.BLANK.equals(pass)) {
-                    dataSource.setPassword(pass);
-                }
-                return dataSource.getConnection();
+		case HALF_CONFIG:
+			if (ConnectionFactory.config.getHost() != null) {
+				builder.append(ConnectionFactory.config.getHost());
+				builder.append(Constants.SYMBOL_COLON);
+				builder.append(ConnectionFactory.config.getPort());
+				builder.append(Constants.SYMBOL_BACK_SLASH);
+			}
+			httpSession = RequestAdaptor.REQUEST_MAP.get(Thread.currentThread().getId()).getSession();
+			if (dbName != null) {
+				builder.append(dbName);
+			}
+			builder.append(_YEARISDATETYPE);
+			builder.append(_SSLOPTION);
+			pass = httpSession.getAttribute(Constants.SESSION_PASS).toString();
+			if (Constants.BLANK.equals(pass)) {
+				pass = null;
+			}
+			connection = DriverManager.getConnection(builder.toString(),
+					httpSession.getAttribute(Constants.SESSION_USER).toString(), pass);
+			break;
 
-            case CONFIG:
-                if (ConnectionFactory.config.getHost() != null) {
-                    builder.append(ConnectionFactory.config.getHost());
-                    builder.append(Constants.SYMBOL_COLON);
-                    builder.append(ConnectionFactory.config.getPort());
-                    builder.append(Constants.SYMBOL_BACK_SLASH);
-                }
-                if (dbName != null) {
-                    builder.append(dbName);
-                }
-                builder.append(_YEARISDATETYPE);
-                dataSource = new MysqlDataSource();
-                dataSource.setUseSSL(false);
-                dataSource.setURL(builder.toString());
-                dataSource.setUser(ConnectionFactory.config.getUser());
-                dataSource.setPassword(ConnectionFactory.config.getPass());
-                return dataSource.getConnection();
-            default:
-                return null;
-        }
-    }
+		case CONFIG:
+			if (ConnectionFactory.config.getHost() != null) {
+				builder.append(ConnectionFactory.config.getHost());
+				builder.append(Constants.SYMBOL_COLON);
+				builder.append(ConnectionFactory.config.getPort());
+				builder.append(Constants.SYMBOL_BACK_SLASH);
+			}
+			if (dbName != null) {
+				builder.append(dbName);
+			}
+			builder.append(_YEARISDATETYPE);
+			builder.append(_SSLOPTION);
+			System.out.println(builder.toString());
+			connection = DriverManager.getConnection(builder.toString(), ConnectionFactory.config.getUser(),
+					ConnectionFactory.config.getPass());
+			break;
+		}
+		System.out.println("[check Connection]");
+		System.out.println(connection.getMetaData());
+		return connection;
+	}
+
 }

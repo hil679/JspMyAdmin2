@@ -227,7 +227,7 @@ public abstract class AbstractLogic {
 	 * 
 	 * @return
 	 */
-	protected synchronized String getTempFilePath() {
+	protected static synchronized String getTempFilePath() {
 		File file = new File(DefaultServlet.getRoot_path(), System.currentTimeMillis() + ".tmp");
 		return file.getAbsolutePath();
 	}

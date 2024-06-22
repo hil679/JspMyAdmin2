@@ -50,9 +50,6 @@ public class HomeController {
 			bean.setToken(requestAdaptor.generateToken());
 			homeLogic = new HomeLogic();
 			homeLogic.fillBean(bean);
-			if (session.getAttribute(Constants.SESSION_LOCALE) != null) {
-				bean.setLanguage(session.getAttribute(Constants.SESSION_LOCALE).toString());
-			}
 		} finally {
 			homeLogic = null;
 		}

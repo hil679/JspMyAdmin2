@@ -1,5 +1,5 @@
 /**
- *
+ * 
  */
 package com.jspmyadmin.framework.web.utils;
 
@@ -30,7 +30,7 @@ public class MessageReader implements Messages {
 	private static final Map<String, Map<String, String>> _MESSAGEMAP = new ConcurrentHashMap<String, Map<String, String>>();
 
 	/**
-	 *
+	 * 
 	 */
 	public static synchronized void read() {
 		if (_MESSAGEMAP.size() > 0) {
@@ -74,7 +74,7 @@ public class MessageReader implements Messages {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param file
 	 * @param locale
 	 * @throws IOException
@@ -93,13 +93,9 @@ public class MessageReader implements Messages {
 			bufferedReader = new BufferedReader(inputStreamReader);
 			messageMap = new ConcurrentHashMap<String, String>();
 			while ((line = bufferedReader.readLine()) != null) {
-				try {
-					if (line.contains(_equals)) {
-						data = line.split(_equals);
-						messageMap.put(data[0].trim(), data[1].trim());
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
+				if (line.contains(_equals)) {
+					data = line.split(_equals);
+					messageMap.put(data[0].trim(), data[1].trim());
 				}
 			}
 			_MESSAGEMAP.put(locale, messageMap);
@@ -123,7 +119,7 @@ public class MessageReader implements Messages {
 	}
 
 	/**
-	 *
+	 * 
 	 * @throws IOException
 	 */
 	public static synchronized void remove() throws IOException {
@@ -136,7 +132,7 @@ public class MessageReader implements Messages {
 	private final Map<String, String> _messageMap;
 
 	/**
-	 *
+	 * 
 	 * @param locale
 	 */
 	public MessageReader(String locale) {
@@ -149,7 +145,7 @@ public class MessageReader implements Messages {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param key
 	 * @return
 	 */

@@ -1,5 +1,5 @@
 /**
- *
+ * 
  */
 package com.jspmyadmin.framework.web.utils;
 
@@ -51,7 +51,7 @@ public class DefaultServlet extends HttpServlet {
 	private static String _root_path = null;
 
 	/**
-	 *
+	 * 
 	 * @param val
 	 * @return
 	 * @throws UnsupportedEncodingException
@@ -69,7 +69,7 @@ public class DefaultServlet extends HttpServlet {
 	}
 
 	/**
-	 *
+	 * 
 	 * @return
 	 */
 	public static ServletContext getContext() {
@@ -92,7 +92,7 @@ public class DefaultServlet extends HttpServlet {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param context
 	 */
 	private static void setContext(ServletContext context) {
@@ -100,7 +100,7 @@ public class DefaultServlet extends HttpServlet {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param rootpath
 	 */
 	private static void setRootPath(String rootpath) {
@@ -114,19 +114,15 @@ public class DefaultServlet extends HttpServlet {
 			setContext(config.getServletContext());
 			if (_context != null) {
 				setWebInfPath(_context.getRealPath("/WEB-INF/"));
-				setRootPath(_web_inf_path + File.separator + "uploads");
+				setRootPath(_web_inf_path + "/uploads");
 				File file = new File(_root_path);
-				if (!file.exists()) {
-					file.setExecutable(true, false);
-					file.setReadable(true, false);
-					file.setWritable(true, false);
-					if (file.mkdirs()) {
-						_LOGGER.log(Level.INFO, "Temporary path created. Path:" + _root_path);
-					} else {
-						_LOGGER.log(Level.WARNING, "Unable to create temporary path. Path:" + _root_path);
-					}
+				file.setExecutable(true, false);
+				file.setReadable(true, false);
+				file.setWritable(true, false);
+				if (file.mkdirs()) {
+					_LOGGER.log(Level.INFO, "Temporary path created. Path:" + _root_path);
 				} else {
-					_LOGGER.log(Level.INFO, "Temporary path already exists. Path:" + _root_path);
+					_LOGGER.log(Level.WARNING, "Unable to create temporary path. Path:" + _root_path);
 				}
 				_context.setAttribute(Constants.APP_DATA_TYPES_INFO, Constants.Utils.DATA_TYPES_INFO);
 				_context.setAttribute(Constants.HOSTNAME, InetAddress.getLocalHost().getHostName());
@@ -183,7 +179,7 @@ public class DefaultServlet extends HttpServlet {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param request
 	 * @param response
 	 * @param filterChain
@@ -214,13 +210,17 @@ public class DefaultServlet extends HttpServlet {
 			boolean isConfig = false;
 			if (ConnectionFactory.isConfigured()) {
 				ConnectionType connectionType = ConnectionTypeCheck.check();
-				if (connectionType == ConnectionType.CONFIG) {
+				switch (connectionType) {
+				case CONFIG:
 					if ("/login.html".equals(path)) {
 						response.sendRedirect(request.getContextPath() + "/home.html");
 						RequestAdaptor.REQUEST_MAP.remove(Thread.currentThread().getId());
 						return;
 					}
 					isConfig = true;
+					break;
+				default:
+					break;
 				}
 			}
 			EncodeHelper encodeObj = new EncodeHelperImpl();
@@ -328,8 +328,7 @@ public class DefaultServlet extends HttpServlet {
 			} catch (IllegalArgumentException e) {
 				response.sendRedirect(request.getContextPath());
 			} catch (Exception e) {
-				session = request.getSession();
-				if (session != null && session.getAttribute(Constants.SESSION_CONNECT) != null) {
+				if (session.getAttribute(Constants.SESSION_CONNECT) != null) {
 					if (ConnectionFactory.isConfigured()) {
 						ConnectionType connectionType = ConnectionTypeCheck.check();
 						switch (connectionType) {
@@ -349,6 +348,8 @@ public class DefaultServlet extends HttpServlet {
 					session.setAttribute(Constants.SESSION_REDIRECT_PARAM, redirectParams);
 					response.sendRedirect(request.getContextPath() + AppConstants.PATH_HOME);
 				} else if (e instanceof JSONException || e instanceof EncodingException) {
+					System.out.println(e instanceof JSONException );
+					System.out.println(e instanceof EncodingException);
 					redirectParams.put(Constants.ERR_KEY, AppConstants.ERR_INVALID_ACCESS);
 					session.setAttribute(Constants.SESSION_REDIRECT_PARAM, redirectParams);
 					response.sendRedirect(request.getContextPath() + AppConstants.PATH_HOME);
@@ -364,7 +365,7 @@ public class DefaultServlet extends HttpServlet {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -381,7 +382,7 @@ public class DefaultServlet extends HttpServlet {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param request
 	 * @param encodeObj
 	 */
@@ -413,7 +414,7 @@ public class DefaultServlet extends HttpServlet {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -428,7 +429,7 @@ public class DefaultServlet extends HttpServlet {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -449,7 +450,7 @@ public class DefaultServlet extends HttpServlet {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param request
 	 */
 	private void _setNewAdd(HttpServletRequest request, final EncodeHelper encodeObj) {
