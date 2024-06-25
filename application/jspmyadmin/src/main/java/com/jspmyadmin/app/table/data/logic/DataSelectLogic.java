@@ -10,13 +10,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import com.jspmyadmin.app.table.data.beans.TableBean;
+import com.jspmyadmin.app.table.data.util.TableSearchBeanSelect;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,9 +79,24 @@ public class DataSelectLogic extends AbstractLogic {
 			}
 			close(resultSet);
 
+			//select searchTableBean
+			TableSearchBeanSelect tableSearchBeanSelect = new TableSearchBeanSelect(_table);
+			TableBean selectTableBean = tableSearchBeanSelect.selectTableBean();
+			dataSelectBean.setTableSearchBean(selectTableBean);
+
 			if (dataSelectBean.getToken() != null) {
 				try {
+					//keyword Search list init
+					if (dataSelectBean.getTableSearchBean() != null) {
+						for (String mainSelectColumn : selectTableBean.getSelectColumn()) {
+							ArrayList<String> colValues = getColumnValuesQuery(apiConnection, resultSet,mainSelectColumn);
+							selectTableBean.setList(mainSelectColumn, colValues);
+						}
+					}
+
+
 					jsonObject = new JSONObject(encodeObj.decode(dataSelectBean.getToken()));
+
 					if (jsonObject.has(Constants.SORT_BY)) {
 						dataSelectBean.setSort_by(jsonObject.getString(Constants.SORT_BY));
 						if (maintainJsonObject == null) {
@@ -92,6 +104,7 @@ public class DataSelectLogic extends AbstractLogic {
 						}
 						maintainJsonObject.put(Constants.SORT_BY, dataSelectBean.getSort_by());
 					}
+
 					if (jsonObject.has(Constants.LIMIT)) {
 						dataSelectBean.setLimit(jsonObject.getString(Constants.LIMIT));
 					}
@@ -159,14 +172,22 @@ public class DataSelectLogic extends AbstractLogic {
 					if (jsonObject.has(Constants.VIEW)) {
 						dataSelectBean.setShow_search(jsonObject.getString(Constants.VIEW));
 					}
+					if (jsonObject.has(Constants.TABLE_BEAN)) {
+						jsonObject.getString(Constants.TABLE_BEAN);
+//						dataSelectBean.setTableSearchBean();
+						if (maintainJsonObject == null) {
+							maintainJsonObject = new JSONObject();
+						}
+						maintainJsonObject.put(Constants.CUSTOMER, jsonObject.getString(Constants.CUSTOMER));
+					}
 				} catch (EncodingException e) {
 				} catch (JSONException e) {
 				}
 			}
 
-			String strSearch = null;
+			StringBuilder searchBuilder = new StringBuilder(searchMain(selectTableBean.getSelectColumn()));
+			String strSearch = searchBuilder.toString();
 			if (dataSelectBean.getSearch_columns() != null && dataSelectBean.getSearch_list() != null) {
-				StringBuilder searchBuilder = null;
 				boolean isNull = false;
 
 				JSONObject columnJsonObject = null;
@@ -218,6 +239,7 @@ public class DataSelectLogic extends AbstractLogic {
 			if (maintainJsonObject == null) {
 				maintainJsonObject = new JSONObject();
 			}
+			maintainJsonObject.put(Constants.TABLE_BEAN, dataSelectBean.getTableSearchBean().getSelectedValues());
 
 			dataSelectBean.setCurrent_page(String.valueOf(page));
 			maintainJsonObject.put(Constants.LIMIT, dataSelectBean.getLimit());
@@ -242,13 +264,15 @@ public class DataSelectLogic extends AbstractLogic {
 			}
 
 			builder = new StringBuilder();
-			builder.append("SELECT * FROM `");
-			builder.append(_table);
-			builder.append(Constants.SYMBOL_TEN);
 
 			if (!isEmpty(strSearch)) {
 				builder.append(strSearch);
 			}
+//			else {
+//				builder.append("SELECT * FROM `");
+//				builder.append(_table);
+//				builder.append(Constants.SYMBOL_TEN);
+//			}
 
 			if (dataSelectBean.getSort_by() != null && !isEmpty(dataSelectBean.getSort_by())) {
 				builder.append(" ORDER BY `");
@@ -365,6 +389,63 @@ public class DataSelectLogic extends AbstractLogic {
 			close(statement);
 			close(apiConnection);
 		}
+	}
+
+	private String searchMain(ArrayList<String> selectCols) {
+		StringBuilder selectBuilder = new StringBuilder("SELECT * From `");
+		selectBuilder.append(_table);
+		selectBuilder.append(Constants.SYMBOL_TEN);
+		selectBuilder.append(Constants.SPACE);
+
+		StringBuilder searchBuilder = null;
+
+		for (String selectCol : selectCols) {
+			if (selectCol.equals("Show All"))
+				return selectBuilder.toString();
+			if (searchBuilder == null) {
+				searchBuilder = new StringBuilder(" WHERE `");
+				searchBuilder.append("customer_name");
+				searchBuilder.append(Constants.SYMBOL_TEN);
+				searchBuilder.append(" LIKE '");
+				searchBuilder.append("%");
+				searchBuilder.append(selectCol);
+				searchBuilder.append("%");
+				searchBuilder.append(Constants.SYMBOL_QUOTE);
+			} else {
+				searchBuilder.append(" AND `");
+				searchBuilder.append("customer_name");
+				searchBuilder.append(Constants.SYMBOL_TEN);
+				searchBuilder.append(" LIKE '");
+				searchBuilder.append("%");
+				searchBuilder.append(selectCol);
+				searchBuilder.append("%");
+				searchBuilder.append(Constants.SYMBOL_QUOTE);
+			}
+		}
+		selectBuilder.append(searchBuilder.toString());
+		return selectBuilder.toString();
+	}
+	private ArrayList<String> getColumnValuesQuery(ApiConnection apiConnection, ResultSet resultSet, String column) throws SQLException {
+		PreparedStatement statement = null;
+		Set<String> values = new HashSet<String>();
+		try {
+			StringBuilder customerSelectBuilder = new StringBuilder();
+			customerSelectBuilder.append("SELECT ");
+			customerSelectBuilder.append(column);
+			customerSelectBuilder.append(" FROM `");
+			customerSelectBuilder.append(_table);
+			customerSelectBuilder.append(Constants.SYMBOL_TEN);
+
+			statement = apiConnection.getStmt(customerSelectBuilder.toString());
+			resultSet = statement.executeQuery();
+			ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+			while(resultSet.next()) {
+				values.add(resultSet.getString(1));
+			}
+		} finally {
+			close(statement);
+		}
+		return new ArrayList<String>(values);
 	}
 
 	/**

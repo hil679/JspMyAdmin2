@@ -4,6 +4,7 @@
 package com.jspmyadmin.app.table.data.beans;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ public class DataSelectBean extends Bean {
 
 	private List<String> limit_list = new ArrayList<String>(Constants.Utils.LIMIT_LIST);
 	private EncodeHelper encodeObj = null;
+	private TableBean tableSearchBean = null;
 
 	/**
 	 * @return the query
@@ -60,6 +62,21 @@ public class DataSelectBean extends Bean {
 	 */
 	public void setQuery(String query) {
 		this.query = query;
+	}
+
+	/**
+	 * @return the tableSearchBean
+	 */
+	public TableBean getTableSearchBean() {
+		return tableSearchBean;
+	}
+
+	/**
+	 * @param tableSearchBean
+	 *            the tableSearchBean to set
+	 */
+	public void setTableSearchBean(TableBean tableSearchBean) {
+		this.tableSearchBean = tableSearchBean;
 	}
 
 	/**

@@ -2,6 +2,7 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="m" uri="http://jspmyadmin.com/taglib/jsp/messages"%>
 <%@ taglib prefix="jma" uri="http://jspmyadmin.com/taglib/jsp/jma"%>
+
 <m:open />
 <!DOCTYPE html>
 <html>
@@ -58,12 +59,53 @@ input[readonly] {
 					</div>
 					<form action="#" accept-charset="utf-8" method="post"
 						id="data-form">
+
 						<input type="hidden" name="request_db" id="data-request-db"
 							value="${requestScope.command.request_db}"> <input
 							type="hidden" name="request_table" id="data-request-table"
 							value="${requestScope.command.request_table}"> <input
 							type="hidden" name="token" id="token" class="server-token"
 							value="${requestScope.command.token}">
+
+						<div class="group">
+						<jma:forLoop items="#dataSelectBean.getTableSearchBean.getSearchColumns" name="selectCol"
+                            key="selectTitle" scope="command" index="columnListIndex">
+                            <jma:fetch index="#columnListIndex"
+                                name="search_list_item" key="searchListItem" />
+                            <th>
+                                <label for="selectCol-list-select">${selectTitle}</label>
+                                <select name="${selectTitle}" id="selectCol-list-select">
+                                    <jma:notEmpty name="#dataSelectBean.getTableSearchBean.getList" scope="command" setValue="${selectCol}">
+                                    <jma:forLoop items="#dataSelectBean.getTableSearchBean.getList" name="selectItem"
+                                                                            scope="command" setValue="${selectCol}">
+                                        <jma:switch>
+                                            <jma:case value="#selectItem" name="#dataSelectBean.getTableSearchBean.customer"
+                                                scope="command,page">
+                                                <option value="${selectItem}" selected="selected">${selectItem}</option>
+                                            </jma:case>
+                                            <jma:default>
+                                                <option value="${selectItem}">${selectItem}</option>
+                                            </jma:default>
+                                        </jma:switch>
+                                        <jma:switch name="#${selectItem}" scope="command">
+                                            <jma:case value="Show All">
+                                                <option value="Show All" selected="selected"><m:print
+                                                        key="lbl.show_all" />
+                                                </option>
+                                            </jma:case>
+                                            <jma:default>
+                                                <option value="Show All"><m:print key="lbl.show_all" />
+                                                </option>
+                                            </jma:default>
+                                        </jma:switch>
+                                    </jma:forLoop>
+                                    </jma:notEmpty>
+
+                                </select>
+                            </th>
+                        </jma:forLoop>
+
+                        </div>
 
 						<div class="group">
 							<div class="group-widget group-header">
@@ -417,12 +459,22 @@ input[readonly] {
 		});
 
 		$(function() {
+		    $('#customer-list-select').change(function() {
+                showWaiting();
+                $('#data-form').prop('action', Server.root + "/table_data.html");
+                $('#data-form').submit();
+            });
 			$('#limit-list-select').change(function() {
 				showWaiting();
 				$('#data-form').prop('action', Server.root + "/table_data.html");
 				$('#data-form').submit();
 			});
 
+            $('#main-search-btn').click(function() {
+				showWaiting();
+				$('#data-form').prop('action', Server.root + "/table_data.html");
+				$('#data-form').submit();
+			});
 			$('#search-btn').click(function() {
 				showWaiting();
 				$('#data-form').prop('action', Server.root + "/table_data.html");

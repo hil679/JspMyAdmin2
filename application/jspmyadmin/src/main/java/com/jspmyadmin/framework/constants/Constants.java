@@ -45,6 +45,7 @@ public final class Constants {
 	public static final String CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
 	public static final String CURRENT_TIMESTAMP1 = "CURRENT_TIMESTA1MP";
 	public static final String CURRENT_USER = "CURRENT_USER";
+	public static final String CUSTOMER = "customer";
 	public static final String DATA = "data";
 	public static final String DATABASE = "database";
 	public static final String DATABASE_NULL = "(null)";
@@ -142,6 +143,7 @@ public final class Constants {
 	public static final String SYMBOL_UNDERSCORE = "_";
 	public static final String SYMBOL_HEX = "0x";
 	public static final String TABLE = "table";
+	public static final String TABLE_BEAN = "table_bean";
 	public static final String TEMP_DIR = System.getProperty("java.io.tmpdir") + "/jspmyadmin/temp/";
 	public static final String THREE = "3";
 	public static final String TRIGGER = "trigger";
@@ -792,6 +794,13 @@ public final class Constants {
 			IGNORE_DATABASE_LIST.add("information_schema");
 			IGNORE_DATABASE_LIST.add("mysql");
 			IGNORE_DATABASE_LIST.add("performance_schema");
+		}
+
+		public static final List<String> STATUS_LIST = new ArrayList<String>(2);
+
+		static {
+			LIMIT_LIST.add("open");
+			LIMIT_LIST.add("close");
 		}
 	}
 

@@ -24,9 +24,10 @@ import com.jspmyadmin.framework.web.utils.RequestAdaptor;
 class ApiConnectionImpl implements ApiConnection {
 
 	private static final String _DRIVER = "com.mysql.jdbc.Driver";
-	private static final String _URL = "jdbc:mysql://";
+	private static final String _URL = "jdbc:mysql://"; //jdbc:mysql://
 	private static final String _YEARISDATETYPE = "?yearIsDateType=false";
 	private static final String _SSLOPTION= "&useSSL=false";
+	private static final String _TIMEZONE= "&serverTimezone=Asia/Seoul";
 
 
 	private final Connection _connection;
@@ -184,6 +185,7 @@ class ApiConnectionImpl implements ApiConnection {
 			}
 			builder.append(_YEARISDATETYPE);
 			builder.append(_SSLOPTION);
+			builder.append(_TIMEZONE);
 			String pass = httpSession.getAttribute(Constants.SESSION_PASS).toString();
 			if (Constants.BLANK.equals(pass)) {
 				pass = null;
@@ -205,6 +207,7 @@ class ApiConnectionImpl implements ApiConnection {
 			}
 			builder.append(_YEARISDATETYPE);
 			builder.append(_SSLOPTION);
+			builder.append(_TIMEZONE);
 			pass = httpSession.getAttribute(Constants.SESSION_PASS).toString();
 			if (Constants.BLANK.equals(pass)) {
 				pass = null;
@@ -225,6 +228,7 @@ class ApiConnectionImpl implements ApiConnection {
 			}
 			builder.append(_YEARISDATETYPE);
 			builder.append(_SSLOPTION);
+			builder.append(_TIMEZONE);
 			System.out.println(builder.toString());
 			connection = DriverManager.getConnection(builder.toString(), ConnectionFactory.config.getUser(),
 					ConnectionFactory.config.getPass());

@@ -57,8 +57,8 @@
 				<version>2.5.1</version>
 				<configuration>
 					<fork>true</fork>
-					<source>${java_version}</source>
-					<target>${java_version}</target>
+					<source>7</source>
+					<target>7</target>
 				</configuration>
 			</plugin>
 
