@@ -76,14 +76,15 @@ input[readonly] {
                                 <label for="selectCol-list-select">${selectTitle}</label>
                                 <select name="${selectTitle}" id="selectCol-list-select" >
                                     <jma:forLoop items="#dataSelectBean.getTableSearchBean.getValueLists" name="SelectedValues"
-                                                 key="optionCol" scope="command">
+                                                 key="optionCol" scope="command, page">
                                         <jma:if name="#optionCol" value="#selectColumn"
-                                                scope="command,page">
+                                                scope="page,page">
                                             <jma:forLoop items="#SelectedValues" name="valueItem" scope="page">
                                                 <jma:switch>
-                                                     <jma:default>
-                                                         <option value="${valueItem}">${valueItem}</option>
-                                                     </jma:default>
+													
+													<jma:default>
+                                                        <option value="${valueItem}">${valueItem}</option>
+													</jma:default>
                                                 </jma:switch>
                                             </jma:forLoop>
                                         </jma:if>
