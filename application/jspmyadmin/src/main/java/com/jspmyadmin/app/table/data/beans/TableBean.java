@@ -8,6 +8,7 @@ import java.util.Map;
 public abstract class  TableBean {
     Map<String, String> searchColumns = new LinkedHashMap<>();
     Map<String, String> selectedValues = new LinkedHashMap<>();
+    Map<String, List<String>> valueLists = new LinkedHashMap<>();
 
     public abstract void setList(String column, ArrayList<String> colValues);
     public abstract List<String> getList(String column);
@@ -15,5 +16,6 @@ public abstract class  TableBean {
     public abstract Map<String, String> getSearchColumns();
     public abstract Map<String, String> getSelectedValues();
     public abstract ArrayList<String> getSelectColumn();
+    public abstract Map<String, List<String>> getValueLists();
     public abstract void setSelectedValues(Map<String, String> selectedValues);
 }
