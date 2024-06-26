@@ -799,8 +799,8 @@ public final class Constants {
 		public static final List<String> STATUS_LIST = new ArrayList<String>(2);
 
 		static {
-			LIMIT_LIST.add("open");
-			LIMIT_LIST.add("close");
+			STATUS_LIST.add("open");
+			STATUS_LIST.add("close");
 		}
 	}
 

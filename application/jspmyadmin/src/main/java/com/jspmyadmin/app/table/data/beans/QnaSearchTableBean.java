@@ -7,7 +7,7 @@ import java.util.*;
 
 public class QnaSearchTableBean extends TableBean {
 
-    private String customer = "Show All";
+    private String customer_name = "Show All";
     private String status = "Show All";
 
 //    Map<String, String> searchColumns = new LinkedHashMap<>();
@@ -20,23 +20,25 @@ public class QnaSearchTableBean extends TableBean {
     public QnaSearchTableBean() {
         searchColumns.put("Customer", "customer_name");
         searchColumns.put("Status", "status");
-        selectedValues.put("customer", customer);
+        selectedValues.put("customer_name", customer_name);
         selectedValues.put("status", status);
+        valueLists.put("customer_name", customer_list);
+        valueLists.put("status", status_list);
     }
 
     /**
      * @return the customer
      */
     public String getCustomer() {
-        return customer;
+        return customer_name;
     }
 
     /**
-     * @param customer
+     * @param customer_name
      *            the customer to set
      */
-    public void setCustomer(String customer) {
-        this.customer = customer;
+    public void setCustomer(String customer_name) {
+        this.customer_name = customer_name;
     }
 
     /**
@@ -104,8 +106,7 @@ public class QnaSearchTableBean extends TableBean {
     public void setList(String column, ArrayList<String> colValues) {
         if (column.equals("customer_name")) {
             setCustomer_list(colValues);
-        } else if (column.equals("status")) {
-
+            valueLists.put("customer_name", colValues);
         }
     }
 
@@ -124,5 +125,10 @@ public class QnaSearchTableBean extends TableBean {
     @Override
     public ArrayList<String> getSelectColumn() {
         return new ArrayList<>(Arrays.asList("customer_name", "status"));
+    }
+
+    @Override
+    public Map<String, List<String>> getValueLists() {
+        return valueLists;
     }
 }

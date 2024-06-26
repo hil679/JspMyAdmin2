@@ -82,6 +82,10 @@ public class DataSelectLogic extends AbstractLogic {
 			//select searchTableBean
 			TableSearchBeanSelect tableSearchBeanSelect = new TableSearchBeanSelect(_table);
 			TableBean selectTableBean = tableSearchBeanSelect.selectTableBean();
+//			for (String col : selectTableBean.getSelectColumn()) {
+//				selectTableBean.setList(col, getColumnValuesQuery(apiConnection, resultSet, col));
+//			}
+
 			dataSelectBean.setTableSearchBean(selectTableBean);
 
 			if (dataSelectBean.getToken() != null) {
@@ -89,8 +93,10 @@ public class DataSelectLogic extends AbstractLogic {
 					//keyword Search list init
 					if (dataSelectBean.getTableSearchBean() != null) {
 						for (String mainSelectColumn : selectTableBean.getSelectColumn()) {
-							ArrayList<String> colValues = getColumnValuesQuery(apiConnection, resultSet,mainSelectColumn);
+							ArrayList<String> colValues = getColumnValuesQuery(apiConnection, resultSet, mainSelectColumn);
 							selectTableBean.setList(mainSelectColumn, colValues);
+
+
 						}
 					}
 
@@ -185,7 +191,7 @@ public class DataSelectLogic extends AbstractLogic {
 				}
 			}
 
-			StringBuilder searchBuilder = new StringBuilder(searchMain(selectTableBean.getSelectColumn()));
+			StringBuilder searchBuilder = new StringBuilder(searchMain(selectTableBean.getSelectedValues()));
 			String strSearch = searchBuilder.toString();
 			if (dataSelectBean.getSearch_columns() != null && dataSelectBean.getSearch_list() != null) {
 				boolean isNull = false;
@@ -391,7 +397,7 @@ public class DataSelectLogic extends AbstractLogic {
 		}
 	}
 
-	private String searchMain(ArrayList<String> selectCols) {
+	private String searchMain( Map<String, String> selectedCols) {
 		StringBuilder selectBuilder = new StringBuilder("SELECT * From `");
 		selectBuilder.append(_table);
 		selectBuilder.append(Constants.SYMBOL_TEN);
@@ -399,25 +405,25 @@ public class DataSelectLogic extends AbstractLogic {
 
 		StringBuilder searchBuilder = null;
 
-		for (String selectCol : selectCols) {
-			if (selectCol.equals("Show All"))
+		for (String selectCol : selectedCols.keySet()) {
+			if (selectedCols.get(selectCol).equals("Show All"))
 				return selectBuilder.toString();
 			if (searchBuilder == null) {
 				searchBuilder = new StringBuilder(" WHERE `");
-				searchBuilder.append("customer_name");
+				searchBuilder.append(selectCol);
 				searchBuilder.append(Constants.SYMBOL_TEN);
 				searchBuilder.append(" LIKE '");
 				searchBuilder.append("%");
-				searchBuilder.append(selectCol);
+				searchBuilder.append(selectedCols.get(selectCol));
 				searchBuilder.append("%");
 				searchBuilder.append(Constants.SYMBOL_QUOTE);
 			} else {
 				searchBuilder.append(" AND `");
-				searchBuilder.append("customer_name");
+				searchBuilder.append(selectCol);
 				searchBuilder.append(Constants.SYMBOL_TEN);
 				searchBuilder.append(" LIKE '");
 				searchBuilder.append("%");
-				searchBuilder.append(selectCol);
+				searchBuilder.append(selectedCols.get(selectCol));
 				searchBuilder.append("%");
 				searchBuilder.append(Constants.SYMBOL_QUOTE);
 			}

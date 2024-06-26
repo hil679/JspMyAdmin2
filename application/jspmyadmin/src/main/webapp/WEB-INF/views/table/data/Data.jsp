@@ -68,39 +68,38 @@ input[readonly] {
 							value="${requestScope.command.token}">
 
 						<div class="group">
-						<jma:forLoop items="#dataSelectBean.getTableSearchBean.getSearchColumns" name="selectCol"
+						<jma:forLoop items="#dataSelectBean.getTableSearchBean.getSearchColumns" name="selectColumn"
                             key="selectTitle" scope="command" index="columnListIndex">
                             <jma:fetch index="#columnListIndex"
                                 name="search_list_item" key="searchListItem" />
                             <th>
                                 <label for="selectCol-list-select">${selectTitle}</label>
-                                <select name="${selectTitle}" id="selectCol-list-select">
-                                    <jma:notEmpty name="#dataSelectBean.getTableSearchBean.getList" scope="command" setValue="${selectCol}">
-                                    <jma:forLoop items="#dataSelectBean.getTableSearchBean.getList" name="selectItem"
-                                                                            scope="command" setValue="${selectCol}">
-                                        <jma:switch>
-                                            <jma:case value="#selectItem" name="#dataSelectBean.getTableSearchBean.customer"
+                                <select name="${selectTitle}" id="selectCol-list-select" >
+                                    <jma:forLoop items="#dataSelectBean.getTableSearchBean.getValueLists" name="SelectedValues"
+                                                 key="optionCol" scope="command">
+                                        <jma:if name="#optionCol" value="#selectColumn"
                                                 scope="command,page">
-                                                <option value="${selectItem}" selected="selected">${selectItem}</option>
-                                            </jma:case>
-                                            <jma:default>
-                                                <option value="${selectItem}">${selectItem}</option>
-                                            </jma:default>
-                                        </jma:switch>
-                                        <jma:switch name="#${selectItem}" scope="command">
-                                            <jma:case value="Show All">
-                                                <option value="Show All" selected="selected"><m:print
-                                                        key="lbl.show_all" />
-                                                </option>
-                                            </jma:case>
-                                            <jma:default>
-                                                <option value="Show All"><m:print key="lbl.show_all" />
-                                                </option>
-                                            </jma:default>
-                                        </jma:switch>
+                                            <jma:forLoop items="#SelectedValues" name="valueItem" scope="page">
+                                                <jma:switch>
+                                                     <jma:default>
+                                                         <option value="${valueItem}">${valueItem}</option>
+                                                     </jma:default>
+                                                </jma:switch>
+                                            </jma:forLoop>
+                                        </jma:if>
                                     </jma:forLoop>
-                                    </jma:notEmpty>
 
+                                    <jma:switch name="#valueItem" scope="command">
+                                        <jma:case value="Show All">
+                                            <option value="Show All" selected="selected"><m:print
+                                                    key="lbl.show_all" />
+                                            </option>
+                                        </jma:case>
+                                        <jma:default>
+                                            <option value="Show All"><m:print key="lbl.show_all" />
+                                            </option>
+                                        </jma:default>
+                                    </jma:switch>
                                 </select>
                             </th>
                         </jma:forLoop>
