@@ -191,6 +191,9 @@
 			<required>true</required>
 		</attribute>
 		<attribute>
+			<name>extraNameVar</name>
+		</attribute>
+		<attribute>
 			<name>scope</name>
 		</attribute>
 		<description>

@@ -20,6 +20,7 @@ public class CaseTag extends AbstractTagSupport {
 
 	private String name = null;
 	private String value = null;
+	private String extraNameVar = null;
 	private String scope = null;
 
 	/**
@@ -36,6 +37,13 @@ public class CaseTag extends AbstractTagSupport {
 	 */
 	public void setValue(String value) {
 		this.value = value;
+	}
+	/**
+	 * @param extraNameVar
+	 *            the value to set
+	 */
+	public void setVar(String extraNameVar) {
+		this.extraNameVar = extraNameVar;
 	}
 
 	/**
@@ -112,11 +120,13 @@ public class CaseTag extends AbstractTagSupport {
 		}
 
 		// checking values in same CaseTag object
-		String[] scopes = new String[2];
+		String[] scopes = new String[3];
 		if (!isEmpty(scope)) {
 			scopes = scope.split(Constants.SYMBOL_COMMA);
 		}
 		Object temp1 = null;
+		if (extraNameVar != null)
+			name = addExtraName(name, extraNameVar, scopes[2]);
 		if (name.startsWith(Constants.SYMBOL_HASH)) {
 
 			if (Constants.COMMAND.equals(scopes[0])) {
@@ -157,6 +167,33 @@ public class CaseTag extends AbstractTagSupport {
 		} else {
 			return SKIP_BODY;
 		}
+	}
+
+	private String addExtraName(String name, String extraNameVar, String extraNameVarScope) {
+		extraNameVar = (String) getActualExtraName(extraNameVar, extraNameVarScope);
+		StringBuilder nameBuilder = new StringBuilder(name);
+		nameBuilder.append(".");
+		nameBuilder.append(extraNameVar);
+		return nameBuilder.toString();
+	}
+
+	private Object getActualExtraName(String extraNameVar, String extraNameVarScope) {
+		Object temp = null;
+		if (extraNameVar.startsWith(Constants.SYMBOL_HASH)) {
+			if (Constants.COMMAND.equals(extraNameVarScope)) {
+				temp = pageContext.getRequest().getAttribute(Constants.COMMAND);
+				temp = super.getReflectValue(temp, name.substring(1));
+			} else if (Constants.REQUEST.equals(extraNameVarScope)) {
+				temp = pageContext.getRequest().getAttribute(name.substring(1));
+			} else if (Constants.PAGE.equals(extraNameVarScope)) {
+				temp = pageContext.getAttribute(name.substring(1));
+			} else if (Constants.SESSION.equals(extraNameVarScope)) {
+				temp = pageContext.getSession().getAttribute(name.substring(1));
+			}
+		} else {
+			temp = name;
+		}
+		return temp;
 	}
 
 }

@@ -81,7 +81,10 @@ input[readonly] {
                                                 scope="page,page">
                                             <jma:forLoop items="#SelectedValues" name="valueItem" scope="page">
                                                 <jma:switch>
-													
+													<jma:case value="#valueItem" name="#dataSelectBean.getTableSearchBean" extraNameVar="#optoinCol"
+															  scope="page, page, page">
+														<option value="${valueItem}" selected="selected">${valueItem}</option>
+													</jma:case>
 													<jma:default>
                                                         <option value="${valueItem}">${valueItem}</option>
 													</jma:default>
