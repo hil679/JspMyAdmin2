@@ -20,6 +20,7 @@ public class CaseTag extends AbstractTagSupport {
 
 	private String name = null;
 	private String value = null;
+	private String extraNameVar = null;
 	private String scope = null;
 
 	/**
@@ -36,6 +37,14 @@ public class CaseTag extends AbstractTagSupport {
 	 */
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	/**
+	 * @param extraNameVar
+	 *            the value to set
+	 */
+	public void setExtraNameVar(String extraNameVar) {
+		this.extraNameVar = extraNameVar;
 	}
 
 	/**
@@ -112,22 +121,46 @@ public class CaseTag extends AbstractTagSupport {
 		}
 
 		// checking values in same CaseTag object
-		String[] scopes = new String[2];
+		String[] scopes = new String[3];
 		if (!isEmpty(scope)) {
 			scopes = scope.split(Constants.SYMBOL_COMMA);
 		}
 		Object temp1 = null;
+		if (extraNameVar != null)
+			name = addExtraName(name, scopes[2]);
 		if (name.startsWith(Constants.SYMBOL_HASH)) {
-
+			String[] split = name.substring(1).split(Constants.SYMBOL_DOT_EXPR);
 			if (Constants.COMMAND.equals(scopes[0])) {
-				temp1 = pageContext.getRequest().getAttribute(Constants.COMMAND);
-				temp1 = super.getReflectValue(temp1, name.substring(1));
+				for (int i = 0; i < split.length; i++) {
+					if (temp1 == null) {
+						temp1 = pageContext.getRequest().getAttribute(Constants.COMMAND);
+					}
+					temp1 = super.getReflectValue(temp1, split[i]);
+				}
 			} else if (Constants.REQUEST.equals(scopes[0])) {
-				temp1 = pageContext.getRequest().getAttribute(name.substring(1));
+				for (int i = 0; i < split.length; i++) {
+					if (temp1 == null) {
+						temp1 = pageContext.getRequest().getAttribute(split[i]);
+					} else {
+						temp1 = super.getReflectValue(temp1, split[i]);
+					}
+				}
 			} else if (Constants.PAGE.equals(scopes[0])) {
-				temp1 = pageContext.getAttribute(name.substring(1));
+				for (int i = 0; i < split.length; i++) {
+					if (temp1 == null) {
+						temp1 = pageContext.getAttribute(split[i]);
+					} else {
+						temp1 = super.getReflectValue(temp1, split[i]);
+					}
+				}
 			} else if (Constants.SESSION.equals(scopes[0])) {
-				temp1 = pageContext.getSession().getAttribute(name.substring(1));
+				for (int i = 0; i < split.length; i++) {
+					if (temp1 == null) {
+						temp1 = pageContext.getSession().getAttribute(split[i]);
+					} else {
+						temp1 = super.getReflectValue(temp1, split[i]);
+					}
+				}
 			}
 		} else {
 			temp1 = name;
@@ -159,4 +192,31 @@ public class CaseTag extends AbstractTagSupport {
 		}
 	}
 
+	private String addExtraName(String name, String extraNameVarScope) {
+		extraNameVar = (String) getActualExtraName(extraNameVarScope);
+		extraNameVar = extraNameVar.substring(0, 1).toUpperCase() + extraNameVar.substring(1);
+		StringBuilder nameBuilder = new StringBuilder(name);
+		nameBuilder.append(".get");
+		nameBuilder.append(extraNameVar);
+		return nameBuilder.toString();
+	}
+
+	private Object getActualExtraName(String extraNameVarScope) {
+		Object temp = null;
+		if (extraNameVar.startsWith(Constants.SYMBOL_HASH)) {
+			if (Constants.COMMAND.equals(extraNameVarScope)) {
+				temp = pageContext.getRequest().getAttribute(Constants.COMMAND);
+				temp = super.getReflectValue(temp, extraNameVar.substring(1));
+			} else if (Constants.REQUEST.equals(extraNameVarScope)) {
+				temp = pageContext.getRequest().getAttribute(extraNameVar.substring(1));
+			} else if (Constants.PAGE.equals(extraNameVarScope)) {
+				temp = pageContext.getAttribute(extraNameVar.substring(1));
+			} else if (Constants.SESSION.equals(extraNameVarScope)) {
+				temp = pageContext.getSession().getAttribute(extraNameVar.substring(1));
+			}
+		} else {
+			temp = name;
+		}
+		return temp;
+	}
 }

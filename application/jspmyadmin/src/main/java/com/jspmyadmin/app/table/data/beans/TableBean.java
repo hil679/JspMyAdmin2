@@ -1,5 +1,8 @@
 package com.jspmyadmin.app.table.data.beans;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,4 +21,5 @@ public abstract class  TableBean {
     public abstract ArrayList<String> getSelectColumn();
     public abstract Map<String, List<String>> getValueLists();
     public abstract void setSelectedValues(Map<String, String> selectedValues);
+    public abstract void setTableBeanField(JSONObject selectedTableBeanJson) throws JSONException;
 }

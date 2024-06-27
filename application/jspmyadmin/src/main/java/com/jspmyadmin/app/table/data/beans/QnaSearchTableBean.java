@@ -2,6 +2,8 @@ package com.jspmyadmin.app.table.data.beans;
 
 import com.jspmyadmin.framework.constants.Constants;
 import com.jspmyadmin.framework.web.utils.Bean;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -27,9 +29,9 @@ public class QnaSearchTableBean extends TableBean {
     }
 
     /**
-     * @return the customer
+     * @return the customer_name
      */
-    public String getCustomer() {
+    public String getCustomer_name() {
         return customer_name;
     }
 
@@ -37,7 +39,7 @@ public class QnaSearchTableBean extends TableBean {
      * @param customer_name
      *            the customer to set
      */
-    public void setCustomer(String customer_name) {
+    public void setCustomer_name(String customer_name) {
         this.customer_name = customer_name;
     }
 
@@ -57,7 +59,7 @@ public class QnaSearchTableBean extends TableBean {
     }
 
     /**
-     * @return the customer
+     * @return the status
      */
     public String getStatus() {
         return status;
@@ -65,7 +67,7 @@ public class QnaSearchTableBean extends TableBean {
 
     /**
      * @param status
-     *            the customer to set
+     *            the status to set
      */
     public void setStatus(String status) {
         this.status = status;
@@ -94,6 +96,12 @@ public class QnaSearchTableBean extends TableBean {
     @Override
     public void setSelectedValues(Map<String, String> selectedValues) {
         this.selectedValues = selectedValues;
+    }
+
+    @Override
+    public void setTableBeanField(JSONObject selectedTableBeanJson) throws JSONException {
+        customer_name = selectedTableBeanJson.getString("customer_name");
+        status = selectedTableBeanJson.getString("status");
     }
 
 

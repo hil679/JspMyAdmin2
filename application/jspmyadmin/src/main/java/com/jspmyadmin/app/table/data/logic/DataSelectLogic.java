@@ -95,11 +95,8 @@ public class DataSelectLogic extends AbstractLogic {
 						for (String mainSelectColumn : selectTableBean.getSelectColumn()) {
 							ArrayList<String> colValues = getColumnValuesQuery(apiConnection, resultSet, mainSelectColumn);
 							selectTableBean.setList(mainSelectColumn, colValues);
-
-
 						}
 					}
-
 
 					jsonObject = new JSONObject(encodeObj.decode(dataSelectBean.getToken()));
 
@@ -178,17 +175,13 @@ public class DataSelectLogic extends AbstractLogic {
 					if (jsonObject.has(Constants.VIEW)) {
 						dataSelectBean.setShow_search(jsonObject.getString(Constants.VIEW));
 					}
-					if (jsonObject.has(Constants.TABLE_BEAN)) {
-						jsonObject.getString(Constants.TABLE_BEAN);
-//						dataSelectBean.setTableSearchBean();
-						if (maintainJsonObject == null) {
-							maintainJsonObject = new JSONObject();
-						}
-						maintainJsonObject.put(Constants.CUSTOMER, jsonObject.getString(Constants.CUSTOMER));
-					}
 				} catch (EncodingException e) {
 				} catch (JSONException e) {
 				}
+			}
+			if (jsonObject.has(Constants.TABLE_BEAN)) {
+				JSONObject tableBeanJson =  jsonObject.getJSONObject(Constants.TABLE_BEAN);
+				selectTableBean.setTableBeanField(tableBeanJson);
 			}
 
 			StringBuilder searchBuilder = new StringBuilder(searchMain(selectTableBean.getSelectedValues()));
@@ -245,6 +238,8 @@ public class DataSelectLogic extends AbstractLogic {
 			if (maintainJsonObject == null) {
 				maintainJsonObject = new JSONObject();
 			}
+
+
 			maintainJsonObject.put(Constants.TABLE_BEAN, dataSelectBean.getTableSearchBean().getSelectedValues());
 
 			dataSelectBean.setCurrent_page(String.valueOf(page));
@@ -407,7 +402,7 @@ public class DataSelectLogic extends AbstractLogic {
 
 		for (String selectCol : selectedCols.keySet()) {
 			if (selectedCols.get(selectCol).equals("Show All"))
-				return selectBuilder.toString();
+				continue;
 			if (searchBuilder == null) {
 				searchBuilder = new StringBuilder(" WHERE `");
 				searchBuilder.append(selectCol);
@@ -428,7 +423,9 @@ public class DataSelectLogic extends AbstractLogic {
 				searchBuilder.append(Constants.SYMBOL_QUOTE);
 			}
 		}
-		selectBuilder.append(searchBuilder.toString());
+
+		if (searchBuilder != null)
+			selectBuilder.append(searchBuilder.toString());
 		return selectBuilder.toString();
 	}
 	private ArrayList<String> getColumnValuesQuery(ApiConnection apiConnection, ResultSet resultSet, String column) throws SQLException {
